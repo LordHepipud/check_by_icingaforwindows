@@ -64,7 +64,7 @@ if ([string]::IsNullOrEmpty($WindowsUser) -Or [string]::IsNullOrEmpty($WindowsPa
 
 [SecureString]$EncryptedPassword = ConvertTo-SecureString -String $WindowsPassword -AsPlainText -Force;
 [PSCredential]$Credential        = New-Object System.Management.Automation.PSCredential -ArgumentList $WindowsUser, $EncryptedPassword;
-$WindowsPassword                        = $null;
+$WindowsPassword                 = $null;
 [hashtable]$InvokeArguments      = @{
     '-ComputerName'   = $Server;
     '-Credential'     = $Credential;
@@ -77,13 +77,11 @@ if ([string]::IsNullOrEmpty($ConfigurationName) -eq $FALSE) {
 }
 
 # Create a new PowerShell remote session with above arguments
-$RemoteSession = New-PSSession @InvokeArguments;
-
+$RemoteSession            = New-PSSession @InvokeArguments;
 # Add the arguments from our plugins to our check command
-$Command = [string]::Format('{0} {1}', $Command, ($args -Join ' '));
-
+[string]$Command          = [string]::Format('{0} {1}', $Command, ($args -Join ' '));
 # Execute our plugin locally within a new shell, allowing us to fetch the exit code
-$scriptblock = [ScriptBlock]::create("powershell.exe -NoProfile -NoLogo -C { $Command }");
+[ScriptBlock]$ScriptBlock = [ScriptBlock]::create("powershell.exe -NoProfile -NoLogo -C { $Command }");
 
 # Invoke the actual check
 Invoke-Command -Session $RemoteSession -ScriptBlock $ScriptBlock | Out-Null;
