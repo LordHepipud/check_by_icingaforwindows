@@ -1,0 +1,178 @@
+{
+    "DataList": {
+        "check_by_icingaforwindows AuthenticationMethod": {
+            "list_name": "check_by_icingaforwindows AuthenticationMethod",
+            "originalId": "1",
+            "entries": [
+                {
+                    "allowed_roles": null,
+                    "entry_value": "Basic",
+                    "entry_name": "Basic",
+                    "format": "string"
+                },
+                {
+                    "allowed_roles": null,
+                    "entry_value": "Credssp",
+                    "entry_name": "Credssp",
+                    "format": "string"
+                },
+                {
+                    "allowed_roles": null,
+                    "entry_value": "Default",
+                    "entry_name": "Default",
+                    "format": "string"
+                },
+                {
+                    "allowed_roles": null,
+                    "entry_value": "Digest",
+                    "entry_name": "Digest",
+                    "format": "string"
+                },
+                {
+                    "allowed_roles": null,
+                    "entry_value": "Kerberos",
+                    "entry_name": "Kerberos",
+                    "format": "string"
+                },
+                {
+                    "allowed_roles": null,
+                    "entry_value": "Negotiate",
+                    "entry_name": "Negotiate",
+                    "format": "string"
+                },
+                {
+                    "allowed_roles": null,
+                    "entry_value": "NegotiateWithImplicitCredential",
+                    "entry_name": "NegotiateWithImplicitCredential",
+                    "format": "string"
+                }
+            ],
+            "owner": "icinga"
+        }
+    },
+    "Command": {
+        "check_by_icingaforwindows": {
+            "methods_execute": "PluginCheck",
+            "object_name": "check_by_icingaforwindows",
+            "vars": {
+                "check_by_icingaforwindows_String_AuthenticationMethod": "Negotiate",
+                "check_by_icingaforwindows_String_Server": "$host.address$"
+            },
+            "is_string": null,
+            "command": "check_by_icingaforwindows.ps1",
+            "zone": null,
+            "disabled": false,
+            "fields": [
+                {
+                    "datafield_id": 1,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 2,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 3,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 4,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 5,
+                    "is_required": "n",
+                    "var_filter": null
+                }
+            ],
+            "arguments": {
+                "-AuthenticationMethod": {
+                    "value": "$check_by_icingaforwindows_String_AuthenticationMethod$",
+                    "order": "-1"
+                },
+                "-WindowsUser": {
+                    "value": "$check_by_icingaforwindows_String_WindowsUser$",
+                    "order": "-2"
+                },
+                "-WindowsPassword": {
+                    "value": "$check_by_icingaforwindows_String_WindowsPassword$",
+                    "order": "-3"
+                },
+                "-Server": {
+                    "value": "$check_by_icingaforwindows_String_Server$",
+                    "order": "-4"
+                },
+                "-ConfigurationName": {
+                    "value": "$check_by_icingaforwindows_String_ConfigurationName$",
+                    "order": "-5"
+                }
+            },
+            "imports": [],
+            "object_type": "object",
+            "timeout": "180"
+        }
+    },
+    "Datafield": {
+        "1": {
+            "settings": {
+                "datalist": "check_by_icingaforwindows AuthenticationMethod",
+                "behavior": "strict",
+                "data_type": "string"
+            },
+            "description": "Defines on how PowerShell remote execution is authenticating to the Windows machine.",
+            "caption": "PowerShell Authentication Method",
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeDatalist",
+            "originalId": "1",
+            "varname": "check_by_icingaforwindows_String_AuthenticationMethod",
+            "format": null
+        },
+        "2": {
+            "settings": {
+                "visibility": "visible"
+            },
+            "description": "The Windows user being used for login into the Windows machine.",
+            "caption": "Windows User",
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeString",
+            "originalId": "2",
+            "varname": "check_by_icingaforwindows_String_WindowsUser",
+            "format": null
+        },
+        "3": {
+            "settings": {
+                "visibility": "hidden"
+            },
+            "description": "The Windows user password being used for login into the Windows machine.",
+            "caption": "Windows Password",
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeString",
+            "originalId": "3",
+            "varname": "check_by_icingaforwindows_String_WindowsPassword",
+            "format": null
+        },
+        "4": {
+            "settings": {
+                "visibility": "visible"
+            },
+            "description": "The Windows machine IP or FQDN to execute the check on.",
+            "caption": "Server",
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeString",
+            "originalId": "4",
+            "varname": "check_by_icingaforwindows_String_Server",
+            "format": null
+        },
+        "5": {
+            "settings": {
+                "visibility": "visible"
+            },
+            "description": "The JEA profile the PowerShell session should be created with.",
+            "caption": "JEA Profile",
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeString",
+            "originalId": "5",
+            "varname": "check_by_icingaforwindows_String_ConfigurationName",
+            "format": null
+        }
+    }
+}
