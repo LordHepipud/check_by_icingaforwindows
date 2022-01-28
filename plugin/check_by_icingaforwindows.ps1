@@ -28,7 +28,7 @@
     [OK] Free Partition Space: 4 Ok
     | 'free_space_partition_s'=1855056000000B;;;0;1999841000000 'free_space_partition_i'=799003800000B;;;0;2199021000000 'free_space_partition_c'=442423800000B;;;0;478964400000 'free_space_partition_t'=102553700000B;;;0;107237900000
 .NOTES
-    Version:   1.0
+    Version:   1.0.0
     Author:    Lord Hepipud
     Company:   Icinga GmbH
     COPYRIGHT: (c) 2022 Icinga GmbH | GPLv2
@@ -65,32 +65,49 @@ if ([string]::IsNullOrEmpty($WindowsUser) -Or [string]::IsNullOrEmpty($WindowsPa
 [SecureString]$EncryptedPassword = ConvertTo-SecureString -String $WindowsPassword -AsPlainText -Force;
 [PSCredential]$Credential        = New-Object System.Management.Automation.PSCredential -ArgumentList $WindowsUser, $EncryptedPassword;
 $WindowsPassword                 = $null;
+[ScriptBlock]$ScriptBlock        = $null;
 [hashtable]$InvokeArguments      = @{
     '-ComputerName'   = $Server;
     '-Credential'     = $Credential;
     '-Authentication' = $AuthenticationMethod;
+    '-ErrorAction'    = 'Stop';
 }
+
+# Add the arguments from our plugins to our check command
+$Command = [string]::Format('{0} {1}', $Command, ($args -Join ' '));
 
 # Set JEA configuration if defined
 if ([string]::IsNullOrEmpty($ConfigurationName) -eq $FALSE) {
     $InvokeArguments.Add('-ConfigurationName', $ConfigurationName);
+
+    # Execute our plugin directly inside a JEA shell
+    $ScriptBlock = [ScriptBlock]::create("$Command -IcingaForWindowsRemoteExecution -IcingaForWindowsJEARemoteExecution");
+} else {
+    # Execute our plugin directly inside a shell and tell the remote server we are a remote source
+    $ScriptBlock = [ScriptBlock]::create("$Command -IcingaForWindowsRemoteExecution");
 }
 
-# Create a new PowerShell remote session with above arguments
-$RemoteSession            = New-PSSession @InvokeArguments;
-# Add the arguments from our plugins to our check command
-[string]$Command          = [string]::Format('{0} {1}', $Command, ($args -Join ' '));
-# Execute our plugin locally within a new shell, allowing us to fetch the exit code
-[ScriptBlock]$ScriptBlock = [ScriptBlock]::create("powershell.exe -NoProfile -NoLogo -C { $Command }");
+# Set exit code to Unknown by default
+[int]$ExitCode = 3;
+$CheckResult   = '';
 
-# Invoke the actual check
-Invoke-Command -Session $RemoteSession -ScriptBlock $ScriptBlock | Out-Null;
+try {
+    # Create a new PowerShell remote session with above arguments
+    $RemoteSession = New-PSSession @InvokeArguments;
 
-# Fetch the exit code of our check execution
-[int]$ExitCode = Invoke-Command -Session $RemoteSession -ScriptBlock { return $LASTEXITCODE };
+    # Invoke the actual check
+    $CheckResult   = Invoke-Command -Session $RemoteSession -ScriptBlock $ScriptBlock -ErrorAction 'Stop';
 
-# Close the session
-Remove-PSSession $RemoteSession | Out-Null;
+    # Fetch the exit code of our check execution
+    $ExitCode      = Invoke-Command -Session $RemoteSession -ScriptBlock { return (Get-IcingaInternalPluginExitCode) } -ErrorAction 'Stop';
+
+    # Close the session
+    Remove-PSSession $RemoteSession -ErrorAction 'Stop' | Out-Null;
+} catch {
+    $CheckResult = [string]::Format('[UNKNOWN] Failed to execute check to remote host: {0}', $_.Exception.Message);
+}
+
+Write-Output $CheckResult;
 
 # Close the shell with our exit code
 exit $ExitCode;
