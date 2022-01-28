@@ -7,7 +7,7 @@ For easier usage, the plugin is designed to work as replacement for the `PowerSh
 
 * Installed [PowerShell for Linux](https://docs.microsoft.com/de-de/powershell/scripting/install/installing-powershell-on-linux)
 * Configured WinRM service on the Windows machines
-* [Icinga for Windows](https://icinga.com/docs/icinga-for-windows/latest/) installed on the Windows machines
+* [Icinga for Windows](https://icinga.com/docs/icinga-for-windows/latest/) >=1.8.0 installed on the Windows machines
 
 ## Usage
 
