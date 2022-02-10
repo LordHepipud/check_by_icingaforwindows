@@ -23,6 +23,16 @@
     The Windows machine IP or FQDN to execute the check on.
 .PARAMETER ConfigurationName
     The JEA profile the PowerShell session should be created with.
+.PARAMETER PowerShellSSLSession
+    By default the plugin will use default WinRM connections by using HTTP. In case
+    you are running WinRM by using HTTPS, you can use this flag to run TLS encrypted
+    sessions
+.PARAMETER PowerShellSkipCACheck
+    By using -PowerShellSSLSession, you can use this argument to skip the CA validation
+    check for certificates
+.PARAMETER PowerShellSkipCNCheck
+    By using -PowerShellSSLSession, you can use this argument to skip the CN validation
+    check for certificates
 .EXAMPLE
     ./check_by_icingaforwindows.ps1 -Server 'windows.example.com' -WindowsUser 'domain\exampleuser' -WindowsPassword 'examplepassword' -C "Use-Icinga -Minimal; Exit-IcingaExecutePlugin -Command 'Invoke-IcingaCheckPartitionSpace' "
     [OK] Free Partition Space: 4 Ok
@@ -38,13 +48,16 @@
 
 param (
     [Alias('C')]
-    [string]$Command              = '',
-    [string]$WindowsUser          = '',
-    [string]$WindowsPassword      = '',
+    [string]$Command               = '',
+    [string]$WindowsUser           = '',
+    [string]$WindowsPassword       = '',
     [ValidateSet('Basic', 'Credssp', 'Default', 'Digest', 'Kerberos', 'Negotiate', 'NegotiateWithImplicitCredential')]
-    [string]$AuthenticationMethod = 'Negotiate',
-    [string]$Server               = '',
-    [string]$ConfigurationName    = ''
+    [string]$AuthenticationMethod  = 'Negotiate',
+    [string]$Server                = '',
+    [string]$ConfigurationName     = '',
+    [switch]$PowerShellSSLSession  = $FALSE,
+    [switch]$PowerShellSkipCACheck = $FALSE,
+    [switch]$PowerShellSkipCNCheck = $FALSE
 );
 
 if ([string]::IsNullOrEmpty($Command)) {
@@ -70,6 +83,8 @@ $WindowsPassword                 = $null;
     '-ComputerName'   = $Server;
     '-Credential'     = $Credential;
     '-Authentication' = $AuthenticationMethod;
+    '-UseSSL'         = $PowerShellSSLSession;
+    '-SessionOption'  = (New-PSSessionOption -SkipCACheck:$PowerShellSkipCACheck -SkipCNCheck:$PowerShellSkipCNCheck)
     '-ErrorAction'    = 'Stop';
 }
 
@@ -104,7 +119,7 @@ try {
     # Close the session
     Remove-PSSession $RemoteSession -ErrorAction 'Stop' | Out-Null;
 } catch {
-    $CheckResult = [string]::Format('[UNKNOWN] Failed to execute check to remote host: {0}', $_.Exception.Message);
+    $CheckResult = [string]::Format('[UNKNOWN] check_by_icingaforwindows: Failed to execute check to remote host: {0}', $_.Exception.Message);
 }
 
 Write-Output $CheckResult;
